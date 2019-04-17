@@ -8,9 +8,8 @@ const server = http.Server(app);
 const io = socketIO(server);
 
 //Constants to be moved:
-const DEFAULT_COOLDOWN = 60;
+const DEFAULT_COOLDOWN = 100;
 const DEFAULT_MAX_HEALTH = 100;
-const DEFAULT_MAX_AMMO = 10;
 const spawnPoints = [ [300,300], [ 300, 500] , [ 500,500] , [500,300]]
 
 //server setup
@@ -22,7 +21,6 @@ app.get('/', function(request, response) {
 server.listen(process.env.PORT || 5000, function() {
   console.log('Server is online')
 });
-
 
 let activeGame = {
   players : {},
@@ -41,8 +39,7 @@ io.on('connection', function(socket) {
         y: spawnPoints[spawnValue][1],
         cooldown: DEFAULT_COOLDOWN,
         color: '#'+(Math.random()*0xFFFFFF<<0).toString(16),
-        isActive: true,
-        ammo: DEFAULT_MAX_AMMO
+        isActive: true
     };
   });
 
@@ -67,7 +64,7 @@ io.on('connection', function(socket) {
     if (data.down) {
       player.y += 5;
     }
-    if(data.ammo > 0 && player.cooldown < 1){
+    if(data.activeFire && player.cooldown < 1){
         new_bullet = {
             x: player.x,
             y: player.y,
@@ -76,7 +73,6 @@ io.on('connection', function(socket) {
         }
         activeGame.bullets.push(new_bullet);
         player.cooldown = DEFAULT_COOLDOWN
-        player.ammo--;
     }
 
 
@@ -114,7 +110,7 @@ io.on('connection', function(socket) {
         activeGame.bullets.splice(activeGame.bullets[i], 1);
       }
   }
-  
+
   io.sockets.emit('state', activeGame);
   });
 });

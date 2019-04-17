@@ -3,6 +3,8 @@ let socket = io();
 const windowWidth = 800;
 const windowHeight = 600;
 
+
+
 const LEFT = [-20,0];
 const RIGHT = [20,0];
 const UP = [0, -20];
@@ -15,10 +17,11 @@ let input = {
     down: false,
     left: false,
     right: false,
-    ammo: 0,
-    velocity: [0,0]
+    velocity: [0,0],
+    activeFire: false
 }
 
+// input logic
 document.addEventListener('keydown', function(event) {
   switch (event.keyCode) {
     case 65: // A
@@ -35,19 +38,19 @@ document.addEventListener('keydown', function(event) {
       break;
     case 37: //arrow left
         input.velocity = LEFT
-        input.ammo++;
+        input.activeFire = true
         break;
     case 38: //arrow up
         input.velocity = UP
-        input.ammo++;
+        input.activeFire = true
         break;
     case 39: //arrow right
         input.velocity = RIGHT;
-        input.ammo++;
+        input.activeFire = true
         break;
     case 40: //arrow down
         input.velocity = DOWN;
-        input.ammo++;
+        input.activeFire = true
         break;
   }
 });
@@ -67,20 +70,19 @@ document.addEventListener('keyup', function(event) {
       input.down = false;
       break;
     case 37:
-        input.ammo=0;
-        break;
+      input.activeFire=false;
+      break;
     case 38:
-        input.ammo=0;
-        break;
+      input.activeFire=false;
+      break;
     case 39:
-        input.ammo=0;
-        break;
+      input.activeFire=false;
+      break;
     case 40:
-        input.ammo=0;
-        break;
+      input.activeFire=false;
+      break;
   }
 });
-
 
 let canvas = document.getElementById('canvas');
 canvas.width = windowWidth;
@@ -90,15 +92,20 @@ let context = canvas.getContext('2d');
 socket.on('state', function(activeGame) {
   context.clearRect(0, 0, windowWidth, windowHeight);
 
-  context.font = "20px Georgia";
-  if(activeGame.players[socket.id] && activeGame.players[socket.id].isActive) {
-    context.fillText( "Health : " + activeGame.players[socket.id].health, 10, 50);
-  } else {
-    context.fillText("You have been defeated", 10, 50);
+  // Render methods
+
+  //player ui
+  if(activeGame.players[socket.id]) {
+    context.font = "20px Georgia";
+    context.fillStyle = activeGame.players[socket.id].color;
+    if(activeGame.players[socket.id].isActive) {
+      context.fillText( "Health : " + activeGame.players[socket.id].health, 10, 50);
+    } else {
+      context.fillStyle = 'red'
+      context.fillText("You have been defeated", 10, 50);
+    }
   }
 
-
-// Render methods
 
 //draw every player
   for (let id in activeGame.players) {
