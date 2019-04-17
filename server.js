@@ -71,7 +71,7 @@ io.on('connection', function(socket) {
         new_bullet = {
             x: player.x,
             y: player.y,
-            shotDirection: data.shotDirection,
+            velocity: data.velocity,
             color: player.color,
         }
         activeGame.bullets.push(new_bullet);
@@ -107,27 +107,14 @@ io.on('connection', function(socket) {
     }
 
   for(let i = 0; i < activeGame.bullets.length; i++){
-      if (activeGame.bullets[i].shotDirection === 'left'){
-        activeGame.bullets[i].x -= 20;
-      }
-      if (activeGame.bullets[i].shotDirection === 'right'){
-        activeGame.bullets[i].x += 20;
-      }
-      if (activeGame.bullets[i].shotDirection === 'up'){
-        activeGame.bullets[i].y -= 20;
-      }
-      if (activeGame.bullets[i].shotDirection === 'down'){
-        activeGame.bullets[i].y += 20;
-      }
+        activeGame.bullets[i].x += activeGame.bullets[i].velocity[0];
+        activeGame.bullets[i].y += activeGame.bullets[i].velocity[1];
 
-      //bullet collision detection
-
-      //destroy bullet
       if(activeGame.bullets[i].x > 800 || activeGame.bullets[i].x < -10 || activeGame.bullets[i].y < -10 || activeGame.bullets[i].y > 600) {
         activeGame.bullets.splice(activeGame.bullets[i], 1);
       }
-
   }
+  
   io.sockets.emit('state', activeGame);
   });
 });

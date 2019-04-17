@@ -1,46 +1,53 @@
 let socket = io();
 
-let windowWidth = 800;
-let windowHeight = 600;
+const windowWidth = 800;
+const windowHeight = 600;
 
-let movement = {
+const LEFT = [-20,0];
+const RIGHT = [20,0];
+const UP = [0, -20];
+const DOWN = [0,20];
+
+
+socket.emit('new player');
+let input = {
     up: false,
     down: false,
     left: false,
     right: false,
     ammo: 0,
-    shotDirection: 'down'
+    velocity: [0,0]
 }
 
 document.addEventListener('keydown', function(event) {
   switch (event.keyCode) {
     case 65: // A
-      movement.left = true;
+      input.left = true;
       break;
     case 87: // W
-      movement.up = true;
+      input.up = true;
       break;
     case 68: // D
-      movement.right = true;
+      input.right = true;
       break;
     case 83: // S
-      movement.down = true;
+      input.down = true;
       break;
-    case 37: //arrow
-        movement.shotDirection= 'left'
-        movement.ammo++;
+    case 37: //arrow left
+        input.velocity = LEFT
+        input.ammo++;
         break;
-    case 38: //arrow
-        movement.shotDirection= 'up'
-        movement.ammo++;
+    case 38: //arrow up
+        input.velocity = UP
+        input.ammo++;
         break;
-    case 39: //arrow
-        movement.shotDirection= 'right'
-        movement.ammo++;
+    case 39: //arrow right
+        input.velocity = RIGHT;
+        input.ammo++;
         break;
-    case 40: //arrow
-        movement.shotDirection= 'down'
-        movement.ammo++;
+    case 40: //arrow down
+        input.velocity = DOWN;
+        input.ammo++;
         break;
   }
 });
@@ -48,37 +55,31 @@ document.addEventListener('keydown', function(event) {
 document.addEventListener('keyup', function(event) {
   switch (event.keyCode) {
     case 65:
-      movement.left = false;
+      input.left = false;
       break;
     case 87:
-      movement.up = false;
+      input.up = false;
       break;
     case 68:
-      movement.right = false;
+      input.right = false;
       break;
     case 83:
-      movement.down = false;
+      input.down = false;
       break;
     case 37:
-        movement.ammo=0;
+        input.ammo=0;
         break;
     case 38:
-        movement.ammo=0;
+        input.ammo=0;
         break;
     case 39:
-        movement.ammo=0;
+        input.ammo=0;
         break;
     case 40:
-        movement.ammo=0;
+        input.ammo=0;
         break;
   }
 });
-
-socket.emit('new player');
-
-setInterval(function() {
-    socket.emit('update', movement);
-}, 1000 / 60);
 
 
 let canvas = document.getElementById('canvas');
@@ -86,7 +87,6 @@ canvas.width = windowWidth;
 canvas.height = windowHeight;
 let context = canvas.getContext('2d');
 
-// on state change
 socket.on('state', function(activeGame) {
   context.clearRect(0, 0, windowWidth, windowHeight);
 
@@ -97,9 +97,12 @@ socket.on('state', function(activeGame) {
     context.fillText("You have been defeated", 10, 50);
   }
 
+
+// Render methods
+
 //draw every player
-  for (var id in activeGame.players) {
-    var player = activeGame.players[id];
+  for (let id in activeGame.players) {
+    let player = activeGame.players[id];
     if (player.isActive){
         context.fillStyle = player.color;
         context.beginPath();
@@ -117,4 +120,9 @@ socket.on('state', function(activeGame) {
     }
 
 });
+
+//set update
+setInterval(function() {
+  socket.emit('update', input);
+}, 1000 / 60);
 
