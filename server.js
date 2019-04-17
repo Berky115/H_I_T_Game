@@ -11,21 +11,26 @@ const io = socketIO(server);
 const DEFAULT_COOLDOWN = 100;
 const DEFAULT_MAX_HEALTH = 100;
 const spawnPoints = [ [300,300], [ 300, 500] , [ 500,500] , [500,300]]
+const MAX_BULLETS = 20;
 
 //server setup
-app.set('port', process.env.PORT || 5000);
+app.set('port', process.env.PORT || 8081);
+// app.set('env', 'production')
 app.use('/static', express.static(__dirname + '/static'));
 app.get('/', function(request, response) {
   response.sendFile(path.join(__dirname, 'index.html'));
 });
-server.listen(process.env.PORT || 5000, function() {
+server.listen(process.env.PORT || 8081, function() {
   console.log('Server is online')
+  console.log('started in ' + app.get('env') + ' mode on http://localhost:' + app.get('port'));
+
 });
 
 let activeGame = {
   players : {},
   bullets : []
 }
+let currentBullet = 0;
 
 io.on('connection', function(socket) {
     console.log('new user connected')
@@ -71,7 +76,17 @@ io.on('connection', function(socket) {
             velocity: data.velocity,
             color: player.color,
         }
-        activeGame.bullets.push(new_bullet);
+        console.log(activeGame.bullets.length + " bullets active")
+        if(activeGame.bullets.length < MAX_BULLETS) {
+          activeGame.bullets.push(new_bullet);
+        } else {
+          console.log('we here');
+          activeGame.bullets[currentBullet] = new_bullet;
+          currentBullet++;
+          if(currentBullet > MAX_BULLETS ) {
+            currentBullet = 0;
+          }
+        }
         player.cooldown = DEFAULT_COOLDOWN
     }
 
@@ -107,7 +122,7 @@ io.on('connection', function(socket) {
         activeGame.bullets[i].y += activeGame.bullets[i].velocity[1];
 
       if(activeGame.bullets[i].x > 800 || activeGame.bullets[i].x < -10 || activeGame.bullets[i].y < -10 || activeGame.bullets[i].y > 600) {
-        activeGame.bullets.splice(activeGame.bullets[i], 1);
+        activeGame.bullets[i].velocity = [0,0]
       }
   }
 
