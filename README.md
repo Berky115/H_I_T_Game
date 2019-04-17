@@ -1,2 +1,6 @@
-# H_I_T_Game
-Node/Socket.io Online multiplayer game
+# H.I.T Game
+
+A WASD shooter designed to explore socket.io. 
+
+Todo:
+- create meaningful game loop
