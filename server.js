@@ -76,16 +76,11 @@ io.on('connection', function(socket) {
             velocity: data.velocity,
             color: player.color,
         }
-        console.log(activeGame.bullets.length + " bullets active")
-        if(activeGame.bullets.length < MAX_BULLETS) {
-          activeGame.bullets.push(new_bullet);
-        } else {
-          console.log('we here');
-          activeGame.bullets[currentBullet] = new_bullet;
-          currentBullet++;
-          if(currentBullet > MAX_BULLETS ) {
-            currentBullet = 0;
-          }
+        console.log('we here');
+        activeGame.bullets[currentBullet] = new_bullet;
+        currentBullet++;
+        if(currentBullet > MAX_BULLETS ) {
+          currentBullet = 0;
         }
         player.cooldown = DEFAULT_COOLDOWN
     }
